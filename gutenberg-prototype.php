@@ -242,7 +242,10 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 
 						// If the release is a pre-release then return the body.
 						if ( $release->prerelease ) {
-							$changelog = nl2br( $release->body );
+							include_once( 'parsedown.php' );
+							$Parsedown = new Parsedown();
+
+							$changelog = $Parsedown->text( $release->body );
 							break;
 						}
 					}
@@ -454,8 +457,6 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 
 			if ( strstr( $source, '/gutenberg-' ) ) {
 				$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $this->config[ 'proper_folder_name' ] );
-
-				return new WP_Error( $corrected_source );
 
 				if ( $wp_filesystem->move( $source, $corrected_source, true ) ) {
 					return $corrected_source;
