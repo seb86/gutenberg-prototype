@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/license-GPL--3.0%2B-red.svg)](https://github.com/seb86/gutenberg-prototype/blob/master/LICENSE.md)
 [![GitHub forks](https://img.shields.io/github/forks/seb86/{github-repo-slug}.svg?style=flat)](https://github.com/seb86/gutenberg-prototype/network)
-[![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=I%20am%20able%20to%20test%20Gutenbergs%20latest%20release%20candidates%20thanks%20to%20Gutenberg%20Prototype%20—&url=https://github.com/seb86/github-repo-slug/&via=sebd86&hashtags=WordPress)
+[![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=I%20am%20able%20to%20test%20Gutenbergs%20latest%20release%20candidates%20thanks%20to%20Gutenberg%20Prototype%20—&url=https://github.com/seb86/gutenberg-prototype/&via=sebd86&hashtags=WordPress)
 
 
 ###### Follow me
@@ -32,7 +32,7 @@ To use this plugin you will need:
 
 #### 📝 Reporting Issues
 
-If you think you have found a bug in the {project/plugin/extension}, a problem with the documentation, or want to see a new feature added, please [open a new issue](https://github.com/seb86/gutenberg-prototype/issues/new) and I will do my best to help you out.
+If you think you have found a bug in the plugin, please [open a new issue](https://github.com/seb86/gutenberg-prototype/issues/new) and I will do my best to help you out.
 
 
 ## Contribute
