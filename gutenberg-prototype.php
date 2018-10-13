@@ -11,7 +11,8 @@
  * Text Domain: gutenberg-prototype
  * Domain Path: /languages/
  *
- * Requires at least: 4.5
+ * Requires WP: 4.5
+ * Requires PHP: 5.3
  * Tested up to: 4.9.8
  *
  * Copyright: © 2018 Sébastien Dumont
@@ -92,16 +93,26 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 				'api_url'            => 'https://api.github.com/repos/WordPress/gutenberg',
 				'github_url'         => 'https://github.com/WordPress/gutenberg',
 				'requires'           => '4.5',
-				'tested'             => '4.9.8'
+				'tested'             => '4.9.8',
+				'release_asset'      => true,
 			);
 
-			add_action( 'plugin_loaded', array( $this, 'flush_update_cache' ) );
-			add_action( 'plugin_loaded', array( $this, 'check_gutenberg_installed' ) );
+			add_action( 'plugins_loaded', array( $this, 'check_gutenberg_installed' ) );
+		} // END __construct()
+
+		/**
+		 * Let's get started.
+		 *
+		 * @access public
+		 * @return void
+		 */
+		public function load_hooks() {
+			add_action( 'plugins_loaded', array( $this, 'flush_update_cache' ) );
 			add_action( 'init', array( $this, 'load_text_domain' ), 0 );
 			add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'api_check' ) );
 			add_filter( 'plugins_api', array( $this, 'get_plugin_info' ), 10, 3 );
-			add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
-		} // END __construct()
+			add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 4 );
+		}
 
 		/**
 		 * Load the plugin text domain once the plugin has initialized.
@@ -125,15 +136,17 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 
 		/**
 		 * Checks if Gutenberg is installed.
+		 * Load hooks if Gutenberg is installed.
 		 *
 		 * @access public
-		 * @return bool
+		 * @return bool|void
 		 */
 		public function check_gutenberg_installed() {
 			if ( ! defined( 'GUTENBERG_VERSION' ) ) {
 				add_action( 'admin_notices', array( $this, 'gutenberg_not_installed' ) );
 				return false;
 			}
+			$this->load_hooks();
 		} // END check_gutenberg_installed()
 
 		/**
@@ -143,7 +156,7 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 		 * @return void
 		 */
 		public function gutenberg_not_installed() {
-			echo '<div class="error"><p>' . sprintf( __( 'Gutenberg Prototype requires %s to be installed.', 'gutenberg-prototype' ), '<a href="https://wordpress.org/plugins/gutenberg/" target="_blank">Gutenberg</a>' ) . '</p></div>';
+			echo '<div class="error"><p>' . sprintf( __( 'Gutenberg Prototype requires %s to be installed and activated.', 'gutenberg-prototype' ), '<a href="https://wordpress.org/plugins/gutenberg/" target="_blank">Gutenberg</a>' ) . '</p></div>';
 		} // END gutenberg_not_installed()
 
 		/**
@@ -153,17 +166,18 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 		 * @return  array
 		 */
 		public function set_update_args() {
+			$latest_prerelease            = $this->get_latest_prerelease();
 			$plugin_data                  = $this->get_plugin_data();
-			$this->config['plugin_name']  = 'Gutenberg ' . $this->get_latest_prerelease();
+			$this->config['plugin_name']  = 'Gutenberg ' . $latest_prerelease;
 			$this->config['version']      = $plugin_data['Version'];
 			$this->config['author']       = $plugin_data['Author'];
 			$this->config['homepage']     = $plugin_data['PluginURI'];
-			$this->config['new_version']  = str_replace( 'v', '', $this->get_latest_prerelease() );
+			$this->config['new_version']  = str_replace( 'v', '', $latest_prerelease );
 			$this->config['last_updated'] = $this->get_date();
 			$this->config['description']  = $this->get_description();
 			$this->config['changelog']    = $this->get_changelog();
-			$this->config['zip_name']     = $this->get_latest_prerelease();
-			$this->config['zip_url']      = 'https://github.com/WordPress/gutenberg/releases/download/' . $this->get_latest_prerelease() . '/gutenberg.zip';
+			$this->config['zip_name']     = $latest_prerelease;
+			$this->config['zip_url']      = 'https://github.com/WordPress/gutenberg/releases/download/' . $latest_prerelease . '/gutenberg.zip';
 		} // END set_update_args()
 
 		/**
@@ -210,7 +224,7 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 
 				// Refresh every 6 hours.
 				if ( ! empty( $tagged_version ) ) {
-					set_site_transient( md5( $this->config['slug'] ) . '_latest_tag', $tagged_version, 60*60*6 );
+					set_site_transient( md5( $this->config['slug'] ) . '_latest_tag', $tagged_version, 60 * 60 * 6 );
 				}
 			}
 
@@ -242,7 +256,9 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 
 						// If the release is a pre-release then return the body.
 						if ( $release->prerelease ) {
-							include_once( 'parsedown.php' );
+							if ( ! class_exists( 'Parsedown' ) ) {
+								include_once( 'parsedown.php' );
+							}
 							$Parsedown = new Parsedown();
 
 							$changelog = $Parsedown->text( $release->body );
@@ -253,7 +269,7 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 
 				// Refresh every 6 hours.
 				if ( ! empty( $changelog ) ) {
-					set_site_transient( md5( $this->config['slug'] ) . '_latest_changelog', $changelog, 60*60*6 );
+					set_site_transient( md5( $this->config['slug'] ) . '_latest_changelog', $changelog, 60 * 60 * 6 );
 				}
 			}
 
@@ -282,7 +298,7 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 					$github_data = json_decode( $github_data['body'] );
 
 					// refresh every 6 hours
-					set_site_transient( md5( $this->config['slug'] ) . '_github_data', $github_data, 60*60*6 );
+					set_site_transient( md5( $this->config['slug'] ) . '_github_data', $github_data, 60 * 60 * 6 );
 				}
 
 				// Store the data in this class instance for future calls
@@ -343,16 +359,6 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 		 * @return object $transient updated plugin data transient
 		 */
 		public function api_check( $transient ) {
-			// Check if the transient contains the 'checked' information
-			// If not, just return its value without hacking it
-			if ( empty( $transient->checked ) ) {
-				return $transient;
-			}
-
-			// Clear our transient.
-			delete_site_transient( md5( $this->config['slug'] ) . '_latest_tag' );
-			delete_site_transient( md5( $this->config['slug'] ) . '_latest_changelog' );
-
 			// Update tags.
 			$this->set_update_args();
 
@@ -398,7 +404,8 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 			$response->plugin          = $this->config['slug'];
 			$response->name            = $this->config['plugin_name'];
 			$response->plugin_name     = $this->config['plugin_name'];
-			$response->version         = $this->config['new_version'];
+			$response->version         = $this->config['version'];
+			$response->new_version     = $this->config['new_version'];
 			$response->author          = $this->config['author'];
 			$response->author_homepage = 'https://wordpress.org/gutenberg/';
 			$response->homepage        = $this->config['homepage'];
@@ -407,7 +414,7 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 			$response->last_updated    = $this->config['last_updated'];
 			$response->sections        = array(
 				'description' => $this->config['description'],
-				'changelog'   => $this->config['changelog']
+				'changelog'   => $this->config['changelog'],
 			);
 			$response->download_link   = $this->config['zip_url'];
 			$response->contributors    = array(
@@ -418,7 +425,7 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 			);
 			$response->banners         = array(
 				'low'  => plugins_url( 'assets/banner-772x250.jpg', __FILE__ ),
-				'high' => plugins_url( 'assets/banner-1544x500.jpg', __FILE__ )
+				'high' => plugins_url( 'assets/banner-1544x500.jpg', __FILE__ ),
 			);
 
 			if ( version_compare( $response->version, $response->new_version, '=' ) ) {
@@ -449,24 +456,48 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 		 * @global $wp_filesystem
 		 * @param  string           $source        File source location
 		 * @param  string           $remote_source Remote file source location
-		 * @param  WP_Upgrader      $upgrader      WP_Upgrader instance
-		 * @return string|WP_Error
+		 * @param  WP_Upgrader      $upgrader      Unused
+		 * @param  array            $hook_extra    Data of what's being updated
+		 * @return string
 		 */
-		public function upgrader_source_selection( $source, $remote_source, $upgrader ) {
+		public function upgrader_source_selection( $source, $remote_source, $upgrader, $hook_extra ) {
 			global $wp_filesystem;
 
-			if ( strstr( $source, '/gutenberg-' ) ) {
-				$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $this->config[ 'proper_folder_name' ] );
-
-				if ( $wp_filesystem->move( $source, $corrected_source, true ) ) {
-					return $corrected_source;
-				} else {
-					return new WP_Error( __( 'Unable to download source file.', 'gutenberg-prototype' ), 500 );
-				}
+			if ( ! isset( $hook_extra['plugin'] ) || $this->config['plugin_file'] !== $hook_extra['plugin'] ) {
+				return $source;
 			}
 
-			return $source;
+			if ( $this->config['release_asset'] ) {
+				$new_source = WP_CONTENT_DIR . "/upgrade/source/{$this->config['proper_folder_name']}";
+				mkdir( $new_source, 0777, true );
+				add_filter( 'upgrader_post_install', array( $this, 'upgrader_post_install' ), 10, 3 );
+			} else {
+				$new_source = trailingslashit( $source ) . $this->config['proper_folder_name'];
+			}
+			$wp_filesystem->move( $source, $new_source, true );
+
+			return trailingslashit( $new_source );
 		} // END upgrader_source_selection()
+
+		/**
+		 * Delete the upgrade directory.
+		 *
+		 * @access public
+		 * @global $wp_filesystem
+		 * @param bool $true        Default is true.
+		 * @param array $hook_extra Unused.
+		 * @param array $result     Information about update process.
+		 * @return bool $true
+		 */
+		public function upgrader_post_install( $true, $hook_extra, $result ) {
+			global $wp_filesystem;
+
+			if ( $result['clear_destination'] ) {
+				$wp_filesystem->delete( dirname( $result['source'] ), true );
+			}
+
+			return $true;
+		}
 
 		/**
 		* Return true if version string is a beta version.
