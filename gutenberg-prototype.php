@@ -93,6 +93,7 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 				'github_url'         => 'https://github.com/WordPress/gutenberg',
 				'requires'           => '4.5',
 				'tested'             => '4.9.8',
+				'release_asset'      => true,
 			);
 
 			add_action( 'plugins_loaded', array( $this, 'check_gutenberg_installed' ) );
@@ -465,10 +466,14 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 				return $source;
 			}
 
-			$new_source = WP_CONTENT_DIR . "/upgrade/source/{$this->config['proper_folder_name']}";
-			mkdir( $new_source, 0777, true );
+			if ( $this->config['release_asset'] ) {
+				$new_source = WP_CONTENT_DIR . "/upgrade/source/{$this->config['proper_folder_name']}";
+				mkdir( $new_source, 0777, true );
+				add_filter( 'upgrader_post_install', array( $this, 'upgrader_post_install' ), 10, 3 );
+			} else {
+				$new_source = trailingslashit( $source ) . $this->config['proper_folder_name'];
+			}
 			$wp_filesystem->move( $source, $new_source, true );
-			add_filter( 'upgrader_post_install', array( $this, 'upgrader_post_install' ), 10, 3 );
 
 			return trailingslashit( $new_source );
 		} // END upgrader_source_selection()
