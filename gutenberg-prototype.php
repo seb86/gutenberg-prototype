@@ -457,22 +457,20 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 		 * @param  string           $source        File source location
 		 * @param  string           $remote_source Remote file source location
 		 * @param  WP_Upgrader      $upgrader      WP_Upgrader instance
+		 * @param  array            $hook_extra    Data of what's being updated
 		 * @return string|WP_Error
 		 */
-		public function upgrader_source_selection( $source, $remote_source, $upgrader ) {
+		public function upgrader_source_selection( $source, $remote_source, $upgrader, $hook_extra ) {
 			global $wp_filesystem;
 
-			if ( strstr( $source, '/gutenberg-' ) ) {
-				$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $this->config[ 'proper_folder_name' ] );
-
-				if ( $wp_filesystem->move( $source, $corrected_source, true ) ) {
-					return $corrected_source;
-				} else {
-					return new WP_Error( __( 'Unable to download source file.', 'gutenberg-prototype' ), 500 );
-				}
+			if ( ! isset( $hook_extra['plugin'] ) || $this->config['plugin_file'] !== $hook_extra['plugin'] ) {
+				return $source;
 			}
 
-			return $source;
+			$corrected_source = trailingslashit( $remote_source ) . $this->config[ 'proper_folder_name' ];
+			$wp_filesystem->move( $source, $corrected_source );
+
+			return trailingslashit( $corrected_source );
 		} // END upgrader_source_selection()
 
 		/**
