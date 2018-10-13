@@ -254,7 +254,9 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 
 						// If the release is a pre-release then return the body.
 						if ( $release->prerelease ) {
-							include_once( 'parsedown.php' );
+							if ( ! class_exists('Parsedown') ) {
+								include_once( 'parsedown.php' );
+							}
 							$Parsedown = new Parsedown();
 
 							$changelog = $Parsedown->text( $release->body );
