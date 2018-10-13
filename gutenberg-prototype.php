@@ -357,12 +357,6 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 		 * @return object $transient updated plugin data transient
 		 */
 		public function api_check( $transient ) {
-			// Check if the transient contains the 'checked' information
-			// If not, just return its value without hacking it
-			if ( empty( $transient->checked ) ) {
-				return $transient;
-			}
-
 			// Clear our transient.
 			delete_site_transient( md5( $this->config['slug'] ) . '_latest_tag' );
 			delete_site_transient( md5( $this->config['slug'] ) . '_latest_changelog' );
