@@ -363,18 +363,20 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 			// Check the version and decide if it's new.
 			$update = version_compare( $this->config['new_version'], $this->config['version'], '>' );
 
-			if ( $update ) {
-				$response              = new stdClass;
-				$response->plugin      = $this->config['slug'];
-				$response->new_version = $this->config['new_version'];
-				$response->slug        = $this->config['slug'];
-				$response->url         = $this->config['github_url'];
-				$response->package     = $this->config['zip_url'];
+			if ( ! $update ) {
+				return $transient;
+			}
 
-				// If response is false, don't alter the transient.
-				if ( false !== $response ) {
-					$transient->response[ $this->config['plugin_file'] ] = $response;
-				}
+			$response              = new stdClass;
+			$response->plugin      = $this->config['slug'];
+			$response->new_version = $this->config['new_version'];
+			$response->slug        = $this->config['slug'];
+			$response->url         = $this->config['github_url'];
+			$response->package     = $this->config['zip_url'];
+
+			// If response is false, don't alter the transient.
+			if ( false !== $response ) {
+				$transient->response[ $this->config['plugin_file'] ] = $response;
 			}
 
 			return $transient;
