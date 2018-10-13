@@ -164,17 +164,18 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 		 * @return  array
 		 */
 		public function set_update_args() {
+			$latest_prerelease            = $this->get_latest_prerelease();
 			$plugin_data                  = $this->get_plugin_data();
-			$this->config['plugin_name']  = 'Gutenberg ' . $this->get_latest_prerelease();
+			$this->config['plugin_name']  = 'Gutenberg ' . $latest_prerelease;
 			$this->config['version']      = $plugin_data['Version'];
 			$this->config['author']       = $plugin_data['Author'];
 			$this->config['homepage']     = $plugin_data['PluginURI'];
-			$this->config['new_version']  = str_replace( 'v', '', $this->get_latest_prerelease() );
+			$this->config['new_version']  = str_replace( 'v', '', $latest_prerelease );
 			$this->config['last_updated'] = $this->get_date();
 			$this->config['description']  = $this->get_description();
 			$this->config['changelog']    = $this->get_changelog();
-			$this->config['zip_name']     = $this->get_latest_prerelease();
-			$this->config['zip_url']      = 'https://github.com/WordPress/gutenberg/releases/download/' . $this->get_latest_prerelease() . '/gutenberg.zip';
+			$this->config['zip_name']     = $latest_prerelease;
+			$this->config['zip_url']      = 'https://github.com/WordPress/gutenberg/releases/download/' . $latest_prerelease . '/gutenberg.zip';
 		} // END set_update_args()
 
 		/**
