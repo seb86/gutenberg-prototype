@@ -357,10 +357,6 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 		 * @return object $transient updated plugin data transient
 		 */
 		public function api_check( $transient ) {
-			// Clear our transient.
-			delete_site_transient( md5( $this->config['slug'] ) . '_latest_tag' );
-			delete_site_transient( md5( $this->config['slug'] ) . '_latest_changelog' );
-
 			// Update tags.
 			$this->set_update_args();
 
