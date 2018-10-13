@@ -92,7 +92,7 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 				'api_url'            => 'https://api.github.com/repos/WordPress/gutenberg',
 				'github_url'         => 'https://github.com/WordPress/gutenberg',
 				'requires'           => '4.5',
-				'tested'             => '4.9.8'
+				'tested'             => '4.9.8',
 			);
 
 			add_action( 'plugins_loaded', array( $this, 'check_gutenberg_installed' ) );
@@ -222,7 +222,7 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 
 				// Refresh every 6 hours.
 				if ( ! empty( $tagged_version ) ) {
-					set_site_transient( md5( $this->config['slug'] ) . '_latest_tag', $tagged_version, 60*60*6 );
+					set_site_transient( md5( $this->config['slug'] ) . '_latest_tag', $tagged_version, 60 * 60 * 6 );
 				}
 			}
 
@@ -254,7 +254,7 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 
 						// If the release is a pre-release then return the body.
 						if ( $release->prerelease ) {
-							if ( ! class_exists('Parsedown') ) {
+							if ( ! class_exists( 'Parsedown' ) ) {
 								include_once( 'parsedown.php' );
 							}
 							$Parsedown = new Parsedown();
@@ -267,7 +267,7 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 
 				// Refresh every 6 hours.
 				if ( ! empty( $changelog ) ) {
-					set_site_transient( md5( $this->config['slug'] ) . '_latest_changelog', $changelog, 60*60*6 );
+					set_site_transient( md5( $this->config['slug'] ) . '_latest_changelog', $changelog, 60 * 60 * 6 );
 				}
 			}
 
@@ -296,7 +296,7 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 					$github_data = json_decode( $github_data['body'] );
 
 					// refresh every 6 hours
-					set_site_transient( md5( $this->config['slug'] ) . '_github_data', $github_data, 60*60*6 );
+					set_site_transient( md5( $this->config['slug'] ) . '_github_data', $github_data, 60 * 60 * 6 );
 				}
 
 				// Store the data in this class instance for future calls
@@ -412,7 +412,7 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 			$response->last_updated    = $this->config['last_updated'];
 			$response->sections        = array(
 				'description' => $this->config['description'],
-				'changelog'   => $this->config['changelog']
+				'changelog'   => $this->config['changelog'],
 			);
 			$response->download_link   = $this->config['zip_url'];
 			$response->contributors    = array(
@@ -423,7 +423,7 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 			);
 			$response->banners         = array(
 				'low'  => plugins_url( 'assets/banner-772x250.jpg', __FILE__ ),
-				'high' => plugins_url( 'assets/banner-1544x500.jpg', __FILE__ )
+				'high' => plugins_url( 'assets/banner-1544x500.jpg', __FILE__ ),
 			);
 
 			if ( version_compare( $response->version, $response->new_version, '=' ) ) {
