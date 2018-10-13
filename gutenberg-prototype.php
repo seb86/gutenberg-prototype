@@ -11,7 +11,8 @@
  * Text Domain: gutenberg-prototype
  * Domain Path: /languages/
  *
- * Requires at least: 4.5
+ * Requires WP: 4.5
+ * Requires PHP: 5.3
  * Tested up to: 4.9.8
  *
  * Copyright: © 2018 Sébastien Dumont
