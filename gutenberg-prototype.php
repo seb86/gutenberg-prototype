@@ -468,9 +468,30 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 			$new_source = WP_CONTENT_DIR . "/upgrade/source/{$this->config['proper_folder_name']}";
 			mkdir( $new_source, 0777, true );
 			$wp_filesystem->move( $source, $new_source, true );
+			add_filter( 'upgrader_post_install', array( $this, 'upgrader_post_install' ), 10, 3 );
 
 			return trailingslashit( $new_source );
 		} // END upgrader_source_selection()
+
+		/**
+		 * Delete the upgrade directory.
+		 *
+		 * @access public
+		 * @global $wp_filesystem
+		 * @param bool $true        Default is true.
+		 * @param array $hook_extra Unused.
+		 * @param array $result     Information about update process.
+		 * @return bool $true
+		 */
+		public function upgrader_post_install( $true, $hook_extra, $result ) {
+			global $wp_filesystem;
+
+			if ( $result['clear_destination'] ) {
+				$wp_filesystem->delete( dirname( $result['source'] ), true );
+			}
+
+			return $true;
+		}
 
 		/**
 		* Return true if version string is a beta version.
