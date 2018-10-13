@@ -95,13 +95,22 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 				'tested'             => '4.9.8'
 			);
 
-			add_action( 'plugin_loaded', array( $this, 'flush_update_cache' ) );
-			add_action( 'plugin_loaded', array( $this, 'check_gutenberg_installed' ) );
+			add_action( 'plugins_loaded', array( $this, 'check_gutenberg_installed' ) );
+		} // END __construct()
+
+		/**
+		 * Let's get started.
+		 *
+		 * @access public
+		 * @return void
+		 */
+		public function load_hooks() {
+			add_action( 'plugins_loaded', array( $this, 'flush_update_cache' ) );
 			add_action( 'init', array( $this, 'load_text_domain' ), 0 );
 			add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'api_check' ) );
 			add_filter( 'plugins_api', array( $this, 'get_plugin_info' ), 10, 3 );
-			add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
-		} // END __construct()
+			add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 4 );
+		}
 
 		/**
 		 * Load the plugin text domain once the plugin has initialized.
@@ -125,15 +134,17 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 
 		/**
 		 * Checks if Gutenberg is installed.
+		 * Load hooks if Gutenberg is installed.
 		 *
 		 * @access public
-		 * @return bool
+		 * @return bool|void
 		 */
 		public function check_gutenberg_installed() {
 			if ( ! defined( 'GUTENBERG_VERSION' ) ) {
 				add_action( 'admin_notices', array( $this, 'gutenberg_not_installed' ) );
 				return false;
 			}
+			$this->load_hooks();
 		} // END check_gutenberg_installed()
 
 		/**
