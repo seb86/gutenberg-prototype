@@ -404,7 +404,8 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 			$response->plugin          = $this->config['slug'];
 			$response->name            = $this->config['plugin_name'];
 			$response->plugin_name     = $this->config['plugin_name'];
-			$response->version         = $this->config['new_version'];
+			$response->version         = $this->config['version'];
+			$response->new_version     = $this->config['new_version'];
 			$response->author          = $this->config['author'];
 			$response->author_homepage = 'https://wordpress.org/gutenberg/';
 			$response->homepage        = $this->config['homepage'];
