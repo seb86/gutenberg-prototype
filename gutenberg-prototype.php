@@ -454,9 +454,9 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 		 * @global $wp_filesystem
 		 * @param  string           $source        File source location
 		 * @param  string           $remote_source Remote file source location
-		 * @param  WP_Upgrader      $upgrader      WP_Upgrader instance
+		 * @param  WP_Upgrader      $upgrader      Unused
 		 * @param  array            $hook_extra    Data of what's being updated
-		 * @return string|WP_Error
+		 * @return string
 		 */
 		public function upgrader_source_selection( $source, $remote_source, $upgrader, $hook_extra ) {
 			global $wp_filesystem;
@@ -465,10 +465,11 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 				return $source;
 			}
 
-			$corrected_source = trailingslashit( $remote_source ) . $this->config[ 'proper_folder_name' ];
-			$wp_filesystem->move( $source, $corrected_source );
+			$new_source = WP_CONTENT_DIR . "/upgrade/source/{$this->config['proper_folder_name']}";
+			mkdir( $new_source, 0777, true );
+			$wp_filesystem->move( $source, $new_source, true );
 
-			return trailingslashit( $corrected_source );
+			return trailingslashit( $new_source );
 		} // END upgrader_source_selection()
 
 		/**
