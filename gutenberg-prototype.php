@@ -535,7 +535,7 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 			global $wp_filesystem;
 
 			if ( strstr( $source, '/gutenberg-' ) ) {
-				$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $this->config[ 'proper_folder_name' ] );
+				$corrected_source = trailingslashit( WP_PLUGIN_DIR . '/' . $this->config[ 'proper_folder_name' ] );
 
 				if ( $wp_filesystem->move( $source, $corrected_source, true ) ) {
 					return $corrected_source;
