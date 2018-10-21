@@ -545,7 +545,7 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 		 * @param  string           $source        File source location
 		 * @param  string           $remote_source Remote file source location
 		 * @param  WP_Upgrader      $upgrader      WP_Upgrader instance
-		 * @param  array            $hook_extra    Data regarding plugin beting updated.
+		 * @param  array            $hook_extra    Data regarding plugin being updated.
 		 * @return string|WP_Error
 		 */
 		public function upgrader_source_selection( $source, $remote_source, $upgrader, $hook_extra ) {
@@ -561,6 +561,10 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 				add_filter( 'upgrader_post_install', array( $this, 'upgrader_post_install' ), 10, 3 );
 			} else {
 				$new_source = trailingslashit( $source ) . $this->config['proper_folder_name'];
+			}
+
+			if ( WP_DEBUG ) {
+				$upgrader->skin->feedback( sprintf( __( 'Renaming %1$s to %2$s&#8230;', 'gutenberg-prototype' ), '<span class="code">' . basename( $source ) . '</span>', '<span class="code">' . $this->config['proper_folder_name'] . '</span>' ) );
 			}
 			$wp_filesystem->move( $source, $new_source, true );
 
