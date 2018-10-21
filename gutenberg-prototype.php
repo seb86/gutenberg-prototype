@@ -108,8 +108,11 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 		 */
 		public function gutenberg_active() {
 			add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'api_check' ) );
-			add_filter( 'plugins_api', array( $this, 'get_plugin_info' ), 10, 3 );
+			add_filter( 'plugins_api_result', array( $this, 'get_plugin_info' ), 10, 3 );
 			add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
+
+			// Auto update Gutenberg.
+			add_filter( 'auto_update_plugin', 'auto_update_gutenberg', 100, 2 );
 		} // END gutenberg_active()
 
 		/**
@@ -199,7 +202,7 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 			$this->config['plugin_name']  = 'Gutenberg ' . $latest_prerelease;
 			$this->config['new_version']  = str_replace( 'v', '', $latest_prerelease );
 			$this->config['last_updated'] = $this->get_date();
-			$this->config['description']  = $this->get_description();
+			//$this->config['description']  = $this->get_description();
 			$this->config['changelog']    = $this->get_changelog();
 			$this->config['zip_name']     = $latest_prerelease;
 			$this->config['zip_url']      = 'https://github.com/WordPress/gutenberg/releases/download/' . $latest_prerelease . '/gutenberg.zip';
@@ -437,11 +440,18 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 			// Get plugin data from the currently installed version of Gutenberg.
 			$plugin_data = $this->get_plugin_data();
 
+			$version = $plugin_data['Version'];
+
 			// Update tags.
 			$this->set_update_args();
 
-			// Check the version and decide if it's new.
-			$update = version_compare( $this->config['new_version'], $plugin_data['Version'], '>' );
+			// Check the version and decide if its new.
+			$update = version_compare( $this->config['new_version'], $version, '>' );
+
+			// If the version is not newer then return default.
+			if ( ! $update ) {
+				return $transient;
+			}
 
 			// Only set the updater to download if its a beta or pre-release version.
 			if ( $update ) {
@@ -461,21 +471,20 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 						$transient->response[ $this->config['plugin_file'] ] = $response;
 					}
 				}
-			}
 
 			return $transient;
 		} // END api_check()
 
 		/**
-		 * Get Plugin info.
+		 * Filters the Plugin Installation API response results.
 		 *
 		 * @access  public
-		 * @param   bool   $false    always false
-		 * @param   string $action   the API function being performed
-		 * @param   object $args     plugin arguments
-		 * @return  object $response the plugin info
+		 * @param   object|WP_Error $response Response object or WP_Error.
+		 * @param   string          $action   The type of information being requested from the Plugin Installation API.
+		 * @param   object          $args     Plugin API arguments.
+		 * @return  object          $response The plugin results.
 		 */
-		public function get_plugin_info( $false, $action, $response ) {
+		public function get_plugin_info( $response, $action, $args ) {
 			// Check if this call for the API is for the right plugin.
 			if ( ! isset( $response->slug ) || $response->slug != $this->config['slug'] ) {
 				return $false;
@@ -484,16 +493,40 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 			// Get plugin data from the currently installed version of Gutenberg.
 			$plugin_data = $this->get_plugin_data();
 
-			$response->slug   = $this->config['slug'];
-			$response->plugin = $this->config['slug'];
-
 			// Update tags.
 			$this->set_update_args();
 
-			// Update the response to return.
+			// New Version
+			$new_version = $this->config['new_version'];
+
+			// Prepare warning!
+			$warning = '';
+
+			if ( $this->is_stable_version( $new_version ) ) {
+				$warning = sprintf( __( '%1$s%3$sThis is a stable release%3$s%2$s', 'gutenberg-prototype' ), '<h1>', '</h1>', '<span>&#9888;</span>' );
+			}
+
+			if ( $this->is_beta_version( $new_version ) ) {
+				$warning = sprintf( __( '%1$s%3$sThis is a beta release%3$s%2$s', 'gutenberg-prototype' ), '<h1>', '</h1>', '<span>&#9888;</span>' );
+			}
+
+			if ( $this->is_rc_version( $new_version ) ) {
+				$warning = sprintf( __( '%1$s%3$sThis is a pre-release%3$s%2$s', 'gutenberg-prototype' ), '<h1>', '</h1>', '<span>&#9888;</span>' );
+			}
+
+			// If the new version is no different than the one installed then reset results.
+			if ( version_compare( $response->version, $new_version, '=' ) ) {
+				$response->name        = 'Gutenberg';
+				$response->plugin_name = 'Gutenberg';
+				$response->version     = $plugin_data['Version'];
+
+				return $response;
+			}
+
+			// Update the results to return.
 			$response->name            = $this->config['plugin_name'];
 			$response->plugin_name     = $this->config['plugin_name'];
-			$response->version         = $this->config['new_version'];
+			$response->version         = $new_version;
 			$response->author          = $plugin_data['Author'];
 			$response->author_homepage = 'https://wordpress.org/gutenberg/';
 			$response->homepage        = $plugin_data['PluginURI'];
@@ -518,29 +551,8 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 				'high' => plugins_url( 'assets/banner-1544x500.jpg', __FILE__ ),
 			);
 
-			// If the new version is no different than the one installed then just return the information already set.
-			if ( version_compare( $response->version, $response->new_version, '=' ) ) {
-				$response->name        = 'Gutenberg';
-				$response->plugin_name = 'Gutenberg';
-				$response->version     = $plugin_data['Version'];
-	
-				return $response;
-			}
-
-			// Prepare warning!
-			$warning = '';
-
-			if ( $this->is_stable_version( $response->version ) ) {
-				$warning = sprintf( __( '%1$s%3$sThis is a stable release%3$s%2$s', 'gutenberg-prototype' ), '<h1>', '</h1>', '<span>&#9888;</span>' );
-			}
-
-			if ( $this->is_beta_version( $response->version ) ) {
-				$warning = sprintf( __( '%1$s%3$sThis is a beta release%3$s%2$s', 'gutenberg-prototype' ), '<h1>', '</h1>', '<span>&#9888;</span>' );
-			}
-
-			if ( $this->is_rc_version( $response->version ) ) {
-				$warning = sprintf( __( '%1$s%3$sThis is a pre-release%3$s%2$s', 'gutenberg-prototype' ), '<h1>', '</h1>', '<span>&#9888;</span>' );
-			}
+			// Update the changelog section.
+			$response->sections['changelog'] = $this->config['changelog'];
 
 			// Apply warning to all sections if any.
 			foreach ( $response->sections as $key => $section ) {
@@ -556,21 +568,27 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 		 *
 		 * @access public
 		 * @global $wp_filesystem
-		 * @param  string           $source        File source location
-		 * @param  string           $remote_source Remote file source location
-		 * @param  WP_Upgrader      $upgrader      WP_Upgrader instance
+		 * @param  string           $source        File source location.
+		 * @param  string           $remote_source Remote file source location.
+		 * @param  WP_Upgrader      $upgrader      WP_Upgrader Upgrader instance.
 		 * @return string|WP_Error
 		 */
 		public function upgrader_source_selection( $source, $remote_source, $upgrader ) {
 			global $wp_filesystem;
 
 			if ( strstr( $source, '/gutenberg-' ) ) {
-				$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $this->config[ 'proper_folder_name' ] );
+				$corrected_source = trailingslashit( $remote_source ) . $this->config['proper_folder_name'] . '/';
+
+				$upgrader->skin->feedback( sprintf(
+					__( 'Renaming %s to %s&#8230;', 'gutenberg-prototype' ), '<span class="code">' . basename($source) . '</span>', '<span class="code">' . $this->config['proper_folder_name'] . '</span>'
+				) );
 
 				if ( $wp_filesystem->move( $source, $corrected_source, true ) ) {
+					$upgrader->skin->feedback( 'Directory successfully renamed.', 'gutenberg-prototype' );
+
 					return $corrected_source;
 				} else {
-					return new WP_Error( __( 'Unable to download source file.', 'gutenberg-prototype' ), 500 );
+					return new WP_Error( 'rename-failed', __( 'Unable to rename the update to match the existing directory.', 'gutenberg-prototype' ) );
 				}
 			}
 
