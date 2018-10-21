@@ -244,7 +244,7 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 					return false;
 				}
 
-				$releases  = json_decode( $raw_response['body'] );
+				$releases       = json_decode( $raw_response['body'] );
 				$published_date = false;
 
 				if ( is_array( $releases ) ) {
@@ -475,7 +475,7 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 			);
 
 			// Add WordPress dot org banners for recognition.
-			$response->banners         = array(
+			$response->banners = array(
 				'low'  => plugins_url( 'assets/banner-772x250.jpg', __FILE__ ),
 				'high' => plugins_url( 'assets/banner-1544x500.jpg', __FILE__ ),
 			);
@@ -485,7 +485,7 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 				$response->name        = 'Gutenberg';
 				$response->plugin_name = 'Gutenberg';
 				$response->version     = $plugin_data['Version'];
-	
+
 				return $response;
 			}
 
