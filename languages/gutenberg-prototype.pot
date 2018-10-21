@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: Gutenberg Prototype 1.0.0\n"
 "Report-Msgid-Bugs-To: https://github.com/seb86/gutenberg-"
 "prototypetester/issues\n"
-"POT-Creation-Date: 2018-10-17 20:04+0200\n"
+"POT-Creation-Date: 2018-10-21 18:35+0200\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -31,26 +31,40 @@ msgstr ""
 msgid "Unserializing instances of this class is forbidden."
 msgstr ""
 
-#: gutenberg-prototype.php:158
+#: gutenberg-prototype.php:168
 #, php-format
-msgid "Gutenberg Prototype requires %s to be installed and activated."
+msgid ""
+"%1$s requires %2$sGutenberg%3$s to be installed and activated in order "
+"to serve updates from GitHub."
 msgstr ""
 
-#: gutenberg-prototype.php:504
+#: gutenberg-prototype.php:178
+#, php-format
+msgid ""
+"%1$s requires %2$sGutenberg%3$s to be installed and activated in order "
+"to serve updates."
+msgstr ""
+
+#: gutenberg-prototype.php:525
 #, php-format
 msgid "%1$s%3$sThis is a stable release%3$s%2$s"
 msgstr ""
 
-#: gutenberg-prototype.php:508
+#: gutenberg-prototype.php:529
 #, php-format
 msgid "%1$s%3$sThis is a beta release%3$s%2$s"
 msgstr ""
 
-#: gutenberg-prototype.php:512
+#: gutenberg-prototype.php:533
 #, php-format
 msgid "%1$s%3$sThis is a pre-release%3$s%2$s"
 msgstr ""
 
-#: gutenberg-prototype.php:543
-msgid "Unable to download source file."
+#: gutenberg-prototype.php:599
+#, php-format
+msgid "Renaming %s to %s&#8230;"
+msgstr ""
+
+#: gutenberg-prototype.php:607
+msgid "Unable to rename the update to match the existing directory."
 msgstr ""
