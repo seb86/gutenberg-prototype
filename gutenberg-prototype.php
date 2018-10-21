@@ -170,8 +170,6 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 
 				else:
 
-					echo sprintf( __( '%1$s requires %2$sGutenberg%3$s to be installed and activated in order to serve updates.', 'gutenberg-prototype' ), esc_html__( 'Gutenberg Prototype', 'gutenberg-prototype' ), '<a href="' . esc_url( wp_nonce_url( self_admin_url( 'update.php?action=install-plugin&plugin=gutenberg' ), 'install-plugin_gutenberg' ) ) . '">', '</a>' );
-
 					if ( current_user_can( 'install_plugins' ) ) {
 						$url = wp_nonce_url( self_admin_url( 'update.php?action=install-plugin&plugin=gutenberg' ), 'install-plugin_gutenberg' );
 					} else {
