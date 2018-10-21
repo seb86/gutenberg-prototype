@@ -12,6 +12,8 @@
 
 Run beta or release candidate versions of Gutenberg from GitHub.
 
+![Plugin Information](https://raw.githubusercontent.com/seb86/gutenberg-prototype/master/screenshot-plugin-information.png)
+
 #### ✅ Requirements
 
 To use this plugin you will need:
