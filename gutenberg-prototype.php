@@ -146,7 +146,7 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 			}
 
 			// Gutenberg is active.
-			self::gutenberg_active();
+			$this->gutenberg_active();
 		} // END check_gutenberg_installed()
 
 		/**
