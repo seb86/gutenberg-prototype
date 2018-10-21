@@ -414,9 +414,11 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 			// Check the version and decide if it's new.
 			$update = version_compare( $this->config['new_version'], $plugin_data['Version'], '>' );
 
+			// Check is it's a release candidate or beta release.
+			$is_beta_rc = ( $this->is_beta_version( $this->config['new_version'] ) || $this->is_rc_version( $this->config['new_version'] ) );
+
 			// Only set the updater to download if its a beta or pre-release version.
-			if ( $update ) {
-				if ( $this->is_beta_version( $this->config['new_version'] ) || $this->is_rc_version( $this->config['new_version'] ) ) {
+			if ( $update && $is_beta_rc ) {
 					$response              = new stdClass;
 					$response->plugin      = $this->config['slug'];
 					$response->version     = $plugin_data['Version'];
@@ -428,9 +430,8 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 					$response->package     = $this->config['zip_url'];
 
 					// If response is false, don't alter the transient.
-					if ( false !== $response ) {
-						$transient->response[ $this->config['plugin_file'] ] = $response;
-					}
+				if ( false !== $response ) {
+					$transient->response[ $this->config['plugin_file'] ] = $response;
 				}
 			}
 
