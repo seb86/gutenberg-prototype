@@ -149,12 +149,42 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 		} // END check_gutenberg_installed()
 
 		/**
-		 * Gutenberg is Not Installed Notice.
+		 * Gutenberg is Not Installed or Activated Notice.
 		 *
 		 * @access public
 		 * @return void
 		 */
 		public function gutenberg_not_installed() {
+			echo '<div class="notice notice-error">';
+			
+				echo '<p>' . sprintf( __( '%1$s requires %2$sGutenberg%3$s to be installed and activated in order to serve updates from GitHub.', 'gutenberg-prototype' ), esc_html__( 'Gutenberg Prototype', 'gutenberg-prototype' ), '<strong>', '</strong>' ) . '</p>';
+
+				echo '<p>';
+
+				if ( ! is_plugin_active( 'gutenberg/gutenberg.php' ) && current_user_can( 'activate_plugin', 'gutenberg/gutenberg.php' ) ) :
+
+					echo '<a href="' . esc_url( wp_nonce_url( self_admin_url( 'plugins.php?action=activate&plugin=gutenberg/gutenberg.php&plugin_status=active' ), 'activate-plugin_gutenberg/gutenberg.php' ) ) . '" class="button button-primary">' . esc_html__( 'Activate Gutenberg', 'gutenberg-prototype' ) . '</a>';
+
+				else:
+
+					echo sprintf( __( '%1$s requires %2$sGutenberg%3$s to be installed and activated in order to serve updates.', 'gutenberg-prototype' ), esc_html__( 'Gutenberg Prototype', 'gutenberg-prototype' ), '<a href="' . esc_url( wp_nonce_url( self_admin_url( 'update.php?action=install-plugin&plugin=gutenberg' ), 'install-plugin_gutenberg' ) ) . '">', '</a>' );
+
+					if ( current_user_can( 'install_plugins' ) ) {
+						$url = wp_nonce_url( self_admin_url( 'update.php?action=install-plugin&plugin=gutenberg' ), 'install-plugin_gutenberg' );
+					} else {
+						$url = 'http://wordpress.org/plugins/gutenberg/';
+					}
+
+					echo '<a href="' . esc_url( $url ) . '" class="button button-primary">' . esc_html__( 'Install Gutenberg', 'gutenberg-prototype' ) . '</a>';
+
+				endif;
+
+				if ( current_user_can( 'deactivate_plugin', 'gutenberg-prototype/gutenberg-prototype.php' ) ) :
+					echo '<a href="' . esc_url( wp_nonce_url( 'plugins.php?action=deactivate&plugin=gutenberg-prototype/gutenberg-prototype.php&plugin_status=inactive', 'deactivate-plugin_gutenberg-prototype/gutenberg-prototype.php' ) ) . '" class="button button-secondary">' . esc_html__( 'Turn off Gutenberg Prototype plugin', 'gutenberg-prototype' ) . '</a>';
+				endif;
+
+				echo '</p>';
+
 			echo '</div>';
 		} // END gutenberg_not_installed()
 
