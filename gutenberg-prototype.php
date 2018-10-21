@@ -113,7 +113,7 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 			add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 4 );
 
 			// Auto update Gutenberg.
-			add_filter( 'auto_update_plugin', 'auto_update_gutenberg', 100, 2 );
+			add_filter( 'auto_update_plugin', array( $this, 'auto_update_gutenberg' ), 100, 2 );
 		} // END gutenberg_active()
 
 		/**
@@ -189,6 +189,21 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 
 				echo '</div>';
 		} // END gutenberg_not_installed()
+
+		/**
+		 * Enable auto updates for Gutenberg.
+		 *
+		 * @param  bool   $update Should this autoupdate.
+		 * @param  object $plugin Plugin being checked.
+		 * @return bool
+		 */
+		public function auto_update_gutenberg( $update, $plugin ) {
+			if ( 'gutenberg' === $item->slug ) {
+				return true;
+			} else {
+				return $update;
+			}
+		} // END auto_update_gutenberg()
 
 		/**
 		 * Update the required plugin data arguments.
