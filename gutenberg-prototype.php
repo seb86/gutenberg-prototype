@@ -202,7 +202,6 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 			$this->config['plugin_name']  = 'Gutenberg ' . $latest_prerelease;
 			$this->config['new_version']  = str_replace( 'v', '', $latest_prerelease );
 			$this->config['last_updated'] = $this->get_date();
-			//$this->config['description']  = $this->get_description();
 			$this->config['changelog']    = $this->get_changelog();
 			$this->config['zip_name']     = $latest_prerelease;
 			$this->config['zip_url']      = 'https://github.com/WordPress/gutenberg/releases/download/' . $latest_prerelease . '/gutenberg.zip';
@@ -388,17 +387,6 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 		} // END get_date()
 
 		/**
-		 * Get plugin description.
-		 *
-		 * @access public
-		 * @return string $_description the description
-		 */
-		public function get_description() {
-			$_description = $this->get_github_data();
-			return ! empty( $_description->description ) ? $_description->description : false;
-		} // END get_description()
-
-		/**
 		 * Get plugin changelog.
 		 *
 		 * @access public
@@ -454,23 +442,22 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 			}
 
 			// Only set the updater to download if its a beta or pre-release version.
-			if ( $update ) {
-				if ( $this->is_beta_version( $this->config['new_version'] ) || $this->is_rc_version( $this->config['new_version'] ) ) {
-					$response              = new stdClass;
-					$response->plugin      = $this->config['slug'];
-					$response->version     = $plugin_data['Version'];
-					$response->author      = $plugin_data['Author'];
-					$response->homepage    = $plugin_data['PluginURI'];
-					$response->new_version = $this->config['new_version'];
-					$response->slug        = $this->config['slug'];
-					$response->url         = $this->config['github_url'];
-					$response->package     = $this->config['zip_url'];
+			if ( $this->is_beta_version( $this->config['new_version'] ) || $this->is_rc_version( $this->config['new_version'] ) ) {
+				$response              = new stdClass;
+				$response->plugin      = $this->config['slug'];
+				//$response->version     = $plugin_data['Version'];
+				$response->author      = $plugin_data['Author'];
+				$response->homepage    = $plugin_data['PluginURI'];
+				$response->new_version = $this->config['new_version'];
+				$response->slug        = $this->config['slug'];
+				$response->url         = $this->config['github_url'];
+				$response->package     = $this->config['zip_url'];
 
-					// If response is false, don't alter the transient.
-					if ( false !== $response ) {
-						$transient->response[ $this->config['plugin_file'] ] = $response;
-					}
+				// If response is false, don't alter the transient.
+				if ( false !== $response ) {
+					$transient->response[ $this->config['plugin_file'] ] = $response;
 				}
+			}
 
 			return $transient;
 		} // END api_check()
@@ -533,10 +520,6 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 			$response->requires        = $this->config['requires'];
 			$response->tested          = $this->config['tested'];
 			$response->last_updated    = $this->config['last_updated'];
-			$response->sections        = array(
-				'description' => $this->config['description'],
-				'changelog'   => $this->config['changelog'],
-			);
 			$response->download_link   = $this->config['zip_url'];
 			$response->contributors    = array(
 				'joen'       => 'https://profiles.wordpress.org/joen',
