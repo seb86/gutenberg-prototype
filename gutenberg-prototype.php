@@ -563,9 +563,6 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 				$new_source = trailingslashit( $source ) . $this->config['proper_folder_name'];
 			}
 
-			if ( WP_DEBUG ) {
-				$upgrader->skin->feedback( sprintf( __( 'Renaming %1$s to %2$s&#8230;', 'gutenberg-prototype' ), '<span class="code">' . basename( $source ) . '</span>', '<span class="code">' . $this->config['proper_folder_name'] . '</span>' ) );
-			}
 			$wp_filesystem->move( $source, $new_source, true );
 
 			return trailingslashit( $new_source );
