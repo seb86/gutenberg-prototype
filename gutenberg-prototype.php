@@ -155,7 +155,7 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 		 * @return void
 		 */
 		public function gutenberg_not_installed() {
-			echo '<div class="error"><p>' . sprintf( __( 'Gutenberg Prototype requires %s to be installed and activated.', 'gutenberg-prototype' ), '<a href="https://wordpress.org/plugins/gutenberg/" target="_blank">Gutenberg</a>' ) . '</p></div>';
+			echo '</div>';
 		} // END gutenberg_not_installed()
 
 		/**
