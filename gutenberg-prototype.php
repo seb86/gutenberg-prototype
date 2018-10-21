@@ -92,7 +92,8 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 				'api_url'            => 'https://api.github.com/repos/WordPress/gutenberg',
 				'github_url'         => 'https://github.com/WordPress/gutenberg',
 				'requires'           => '4.5',
-				'tested'             => '4.9.8'
+				'tested'             => '4.9.8',
+				'release_asset'      => true,
 			);
 
 			add_action( 'plugins_loaded', array( $this, 'flush_update_cache' ) );
@@ -109,7 +110,7 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 		public function gutenberg_active() {
 			add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'api_check' ) );
 			add_filter( 'plugins_api', array( $this, 'get_plugin_info' ), 10, 3 );
-			add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
+			add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 4 );
 		} // END gutenberg_active()
 
 		/**
@@ -529,23 +530,48 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 		 * @param  string           $source        File source location
 		 * @param  string           $remote_source Remote file source location
 		 * @param  WP_Upgrader      $upgrader      WP_Upgrader instance
+		 * @param  array            $hook_extra    Data regarding plugin beting updated.
 		 * @return string|WP_Error
 		 */
-		public function upgrader_source_selection( $source, $remote_source, $upgrader ) {
+		public function upgrader_source_selection( $source, $remote_source, $upgrader, $hook_extra ) {
 			global $wp_filesystem;
 
-			if ( strstr( $source, '/gutenberg-' ) ) {
-				$corrected_source = trailingslashit( WP_PLUGIN_DIR . '/' . $this->config[ 'proper_folder_name' ] );
-
-				if ( $wp_filesystem->move( $source, $corrected_source, true ) ) {
-					return $corrected_source;
-				} else {
-					return new WP_Error( __( 'Unable to download source file.', 'gutenberg-prototype' ), 500 );
-				}
+			if ( ! isset( $hook_extra['plugin'] ) || $this->config['plugin_file'] !== $hook_extra['plugin'] ) {
+				return $source;
 			}
 
-			return $source;
+			if ( $this->config['release_asset'] ) {
+				$new_source = WP_CONTENT_DIR . "/upgrade/source/{$this->config['proper_folder_name']}";
+				mkdir( $new_source, 0777, true );
+				add_filter( 'upgrader_post_install', array( $this, 'upgrader_post_install' ), 10, 3 );
+			} else {
+				$new_source = trailingslashit( $source ) . $this->config['proper_folder_name'];
+			}
+			$wp_filesystem->move( $source, $new_source, true );
+
+			return trailingslashit( $new_source );
 		} // END upgrader_source_selection()
+
+
+		/**
+		 * Delete the upgrade directory.
+		 *
+		 * @access public
+		 * @global $wp_filesystem
+		 * @param bool $true        Default is true.
+		 * @param array $hook_extra Unused.
+		 * @param array $result     Information about update process.
+		 * @return bool $true
+		 */
+		public function upgrader_post_install( $true, $hook_extra, $result ) {
+			global $wp_filesystem;
+
+			if ( $result['clear_destination'] ) {
+				$wp_filesystem->delete( dirname( $result['source'] ), true );
+			}
+
+			return $true;
+		}
 
 		/**
 		 * Return true if version string is a beta version.
