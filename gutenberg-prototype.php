@@ -173,7 +173,7 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 					if ( current_user_can( 'install_plugins' ) ) {
 						$url = wp_nonce_url( self_admin_url( 'update.php?action=install-plugin&plugin=gutenberg' ), 'install-plugin_gutenberg' );
 					} else {
-						$url = 'http://wordpress.org/plugins/gutenberg/';
+						$url = 'https://wordpress.org/plugins/gutenberg/';
 					}
 
 					echo '<a href="' . esc_url( $url ) . '" class="button button-primary">' . esc_html__( 'Install Gutenberg', 'gutenberg-prototype' ) . '</a>';
