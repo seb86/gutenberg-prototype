@@ -428,9 +428,17 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 		 * @return object $transient updated plugin data transient
 		 */
 		public function api_check( $transient ) {
-			// Clear our transient.
+			/**
+			 * Clear our transient if we have debug enabled and overruled the transients.
+			 * This will allow the API to check fresh every time.
+			 *
+			 * DEV NOTE: If api checked to many times in a short amount of time, 
+			 * GitHub will block you from accessing the API for 1 hour.
+			 */
+			if ( WP_DEBUG && $this->overrule_transients() ) {
 			delete_site_transient( md5( $this->config['slug'] ) . '_latest_tag' );
 			delete_site_transient( md5( $this->config['slug'] ) . '_latest_changelog' );
+			}
 
 			// Get plugin data from the currently installed version of Gutenberg.
 			$plugin_data = $this->get_plugin_data();
@@ -443,11 +451,16 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 			// Check the version and decide if its new.
 			$update = version_compare( $this->config['new_version'], $version, '>' );
 
-			// Check is it's a release candidate or beta release.
+			// If the version is not newer then return default.
+			if ( ! $update ) {
+				return $transient;
+			}
+
+			// Check if its a beta release or a release candidate.
 			$is_beta_rc = ( $this->is_beta_version( $this->config['new_version'] ) || $this->is_rc_version( $this->config['new_version'] ) );
 
 			// Only set the updater to download if its a beta or pre-release version.
-			if ( $update && $is_beta_rc ) {
+			if ( $is_beta_rc ) {
 					$response              = new stdClass;
 					$response->plugin      = $this->config['slug'];
 					$response->version     = $plugin_data['Version'];
@@ -534,7 +547,7 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 			);
 
 			// Add WordPress dot org banners for recognition.
-			$response->banners = array(
+			$response->banners         = array(
 				'low'  => plugins_url( 'assets/banner-772x250.jpg', __FILE__ ),
 				'high' => plugins_url( 'assets/banner-1544x500.jpg', __FILE__ ),
 			);
@@ -556,10 +569,10 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 		 *
 		 * @access public
 		 * @global $wp_filesystem
-		 * @param  string           $source        File source location
-		 * @param  string           $remote_source Remote file source location
-		 * @param  WP_Upgrader      $upgrader      WP_Upgrader instance
-		 * @param  array            $hook_extra    Data regarding plugin being updated.
+		 * @param  string          $source        File source location.
+		 * @param  string          $remote_source Remote file source location.
+		 * @param  WP_Upgrader     $upgrader      WP_Upgrader instance.
+		 * @param  array           $hook_extra    Data regarding plugin being updated.
 		 * @return string|WP_Error
 		 */
 		public function upgrader_source_selection( $source, $remote_source, $upgrader, $hook_extra ) {
@@ -569,7 +582,10 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 				return $source;
 			}
 
-			$new_source = WP_CONTENT_DIR . "/upgrade/source/{$this->confi['proper_folder_name']}";
+			// Temporary location to store the Gutenberg update.
+			$new_source = WP_CONTENT_DIR . "/upgrade/gutenberg_update/{$this->config['proper_folder_name']}";
+
+			// Create temporary directory to store the Gutenberg update.
 			mkdir( $new_source, 0777, true );
 			add_filter( 'upgrader_post_install', array( $this, 'upgrader_post_install' ), 10, 3 );
 
@@ -582,16 +598,15 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 			return trailingslashit( $new_source );
 		} // END upgrader_source_selection()
 
-
 		/**
-		 * Delete the upgrade directory.
+		 * Delete the temporary upgrade directory.
 		 *
 		 * @access public
 		 * @global $wp_filesystem
-		 * @param bool $true        Default is true.
-		 * @param array $hook_extra Unused.
-		 * @param array $result     Information about update process.
-		 * @return bool $true
+		 * @param  bool  $true       Default is true.
+		 * @param  array $hook_extra Unused.
+		 * @param  array $result     Information about update process.
+		 * @return bool  $true
 		 */
 		public function upgrader_post_install( $true, $hook_extra, $result ) {
 			global $wp_filesystem;
@@ -601,7 +616,7 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 			}
 
 			return $true;
-		}
+		} // END upgrader_post_install()
 
 		/**
 		 * Return true if version string is a beta version.
