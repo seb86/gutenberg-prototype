@@ -171,9 +171,9 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 
 				echo '<p>';
 
-			if ( ! is_plugin_active( 'gutenberg/gutenberg.php' ) && current_user_can( 'activate_plugin', 'gutenberg/gutenberg.php' ) ) :
+				if ( ! is_plugin_active( 'gutenberg/gutenberg.php' ) && current_user_can( 'activate_plugin', 'gutenberg/gutenberg.php' ) ) :
 
-				echo '<a href="' . esc_url( wp_nonce_url( self_admin_url( 'plugins.php?action=activate&plugin=gutenberg/gutenberg.php&plugin_status=active' ), 'activate-plugin_gutenberg/gutenberg.php' ) ) . '" class="button button-primary">' . esc_html__( 'Activate Gutenberg', 'gutenberg-prototype' ) . '</a>';
+					echo '<a href="' . esc_url( wp_nonce_url( self_admin_url( 'plugins.php?action=activate&plugin=gutenberg/gutenberg.php&plugin_status=active' ), 'activate-plugin_gutenberg/gutenberg.php' ) ) . '" class="button button-primary">' . esc_html__( 'Activate Gutenberg', 'gutenberg-prototype' ) . '</a>';
 
 				else :
 
@@ -193,7 +193,7 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 
 				echo '</p>';
 
-				echo '</div>';
+			echo '</div>';
 		} // END gutenberg_not_installed()
 
 		/**
@@ -443,8 +443,8 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 			 * GitHub will block you from accessing the API for 1 hour.
 			 */
 			if ( WP_DEBUG && $this->overrule_transients() ) {
-			delete_site_transient( md5( $this->config['slug'] ) . '_latest_tag' );
-			delete_site_transient( md5( $this->config['slug'] ) . '_latest_changelog' );
+				delete_site_transient( md5( $this->config['slug'] ) . '_latest_tag' );
+				delete_site_transient( md5( $this->config['slug'] ) . '_latest_changelog' );
 			}
 
 			// Get plugin data from the currently installed version of Gutenberg.
@@ -468,17 +468,17 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 
 			// Only set the updater to download if its a beta or pre-release version.
 			if ( $is_beta_rc ) {
-					$response              = new stdClass;
-					$response->plugin      = $this->config['slug'];
-					$response->version     = $plugin_data['Version'];
-					$response->author      = $plugin_data['Author'];
-					$response->homepage    = $plugin_data['PluginURI'];
-					$response->new_version = $this->config['new_version'];
-					$response->slug        = $this->config['slug'];
-					$response->url         = $this->config['github_url'];
-					$response->package     = $this->config['zip_url'];
+				$response              = new stdClass;
+				$response->plugin      = $this->config['slug'];
+				$response->version     = $plugin_data['Version'];
+				$response->author      = $plugin_data['Author'];
+				$response->homepage    = $plugin_data['PluginURI'];
+				$response->new_version = $this->config['new_version'];
+				$response->slug        = $this->config['slug'];
+				$response->url         = $this->config['github_url'];
+				$response->package     = $this->config['zip_url'];
 
-					// If response is false, don't alter the transient.
+				// If response is false, don't alter the transient.
 				if ( false !== $response ) {
 					$transient->response[ $this->config['plugin_file'] ] = $response;
 				}
@@ -589,42 +589,22 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 				return $source;
 			}
 
-			// Temporary location to store the Gutenberg update.
-			$new_source = WP_CONTENT_DIR . "/upgrade/source/{$this->config['proper_folder_name']}";
+			$proper_folder_name = WP_CONTENT_DIR . "/upgrade/{$this->config['proper_folder_name']}";
 
-			// Create temporary directory to store the Gutenberg update.
-			mkdir( $new_source, 0777, true );
-			add_filter( 'upgrader_post_install', array( $this, 'upgrader_post_install' ), 10, 3 );
+			// Rename source directory to the proper folder name.
+			rename( $source, $proper_folder_name );
 
 			if ( WP_DEBUG ) {
 				$upgrader->skin->feedback( sprintf( __( 'Renaming %1$s to %2$s&#8230;', 'gutenberg-prototype' ), '<span class="code">' . basename( $source ) . '</span>', '<span class="code">' . $this->config['proper_folder_name'] . '</span>' ) );
 			}
 
-			// Move update to the temporary directory.
-			$wp_filesystem->move( $source, $new_source, true );
+			$new_source = trailingslashit( $proper_folder_name );
 
-			return trailingslashit( $new_source );
+			// Move update to the plugin directory.
+			$wp_filesystem->move( $new_source, WP_PLUGIN_DIR . "/{$this->config['proper_folder_name']}", true );
+
+			return $new_source;
 		} // END upgrader_source_selection()
-
-		/**
-		 * Delete the temporary upgrade directory.
-		 *
-		 * @access public
-		 * @global $wp_filesystem
-		 * @param  bool  $true       Default is true.
-		 * @param  array $hook_extra Unused.
-		 * @param  array $result     Information about update process.
-		 * @return bool  $true
-		 */
-		public function upgrader_post_install( $true, $hook_extra, $result ) {
-			global $wp_filesystem;
-
-			if ( $result['clear_destination'] ) {
-				$wp_filesystem->delete( dirname( $result['source'] ), true );
-			}
-
-			return $true;
-		} // END upgrader_post_install()
 
 		/**
 		 * Return true if version string is a beta version.
