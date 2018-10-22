@@ -12,6 +12,8 @@
 
 Run beta or release candidate versions of Gutenberg from GitHub.
 
+> Please only use this on development sites or local setups only to test Gutenberg or develop blocks against the latest changes.
+
 ![Plugin Information](https://raw.githubusercontent.com/seb86/gutenberg-prototype/master/screenshot-plugin-information.png)
 
 #### ✅ Requirements
