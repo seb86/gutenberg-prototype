@@ -590,7 +590,7 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 			}
 
 			// Temporary location to store the Gutenberg update.
-			$new_source = WP_CONTENT_DIR . "/upgrade/gutenberg_update/{$this->config['proper_folder_name']}";
+			$new_source = WP_CONTENT_DIR . "/upgrade/source/{$this->config['proper_folder_name']}";
 
 			// Create temporary directory to store the Gutenberg update.
 			mkdir( $new_source, 0777, true );
@@ -600,6 +600,7 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 				$upgrader->skin->feedback( sprintf( __( 'Renaming %1$s to %2$s&#8230;', 'gutenberg-prototype' ), '<span class="code">' . basename( $source ) . '</span>', '<span class="code">' . $this->config['proper_folder_name'] . '</span>' ) );
 			}
 
+			// Move update to the temporary directory.
 			$wp_filesystem->move( $source, $new_source, true );
 
 			return trailingslashit( $new_source );
