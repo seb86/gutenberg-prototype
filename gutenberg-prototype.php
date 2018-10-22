@@ -155,9 +155,16 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 		 * Gutenberg is Not Installed or Activated Notice.
 		 *
 		 * @access public
+		 * @global string $pagenow
 		 * @return void
 		 */
 		public function gutenberg_not_installed() {
+			global $pagenow;
+
+			if ( $pagenow == 'update.php' ) {
+				return false;
+			}
+
 			echo '<div class="notice notice-error">';
 
 				echo '<p>' . sprintf( __( '%1$s requires %2$sGutenberg%3$s to be installed and activated in order to serve updates from GitHub.', 'gutenberg-prototype' ), esc_html__( 'Gutenberg Prototype', 'gutenberg-prototype' ), '<strong>', '</strong>' ) . '</p>';
