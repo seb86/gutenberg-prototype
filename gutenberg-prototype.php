@@ -93,7 +93,6 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 				'github_url'         => 'https://github.com/WordPress/gutenberg',
 				'requires'           => '4.5',
 				'tested'             => '4.9.8',
-				'release_asset'      => true,
 			);
 
 			add_action( 'plugins_loaded', array( $this, 'flush_update_cache' ) );
@@ -570,13 +569,9 @@ if ( ! class_exists( 'Gutenberg_Prototype' ) ) {
 				return $source;
 			}
 
-			if ( $this->config['release_asset'] ) {
-				$new_source = WP_CONTENT_DIR . "/upgrade/source/{$this->config['proper_folder_name']}";
-				mkdir( $new_source, 0777, true );
-				add_filter( 'upgrader_post_install', array( $this, 'upgrader_post_install' ), 10, 3 );
-			} else {
-				$new_source = trailingslashit( $source ) . $this->config['proper_folder_name'];
-			}
+			$new_source = WP_CONTENT_DIR . "/upgrade/source/{$this->confi['proper_folder_name']}";
+			mkdir( $new_source, 0777, true );
+			add_filter( 'upgrader_post_install', array( $this, 'upgrader_post_install' ), 10, 3 );
 
 			if ( WP_DEBUG ) {
 				$upgrader->skin->feedback( sprintf( __( 'Renaming %1$s to %2$s&#8230;', 'gutenberg-prototype' ), '<span class="code">' . basename( $source ) . '</span>', '<span class="code">' . $this->config['proper_folder_name'] . '</span>' ) );
